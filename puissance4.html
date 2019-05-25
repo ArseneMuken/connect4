@@ -1,0 +1,602 @@
+<html>
+	<head>  
+
+	</head>
+	<body onload="init()">
+		<div id="puissance4">
+		</div>
+		<script type="text/javascript" >
+		var puissance4=new Array();
+		var src;
+		var tour;
+		var desactiver;
+		var id_puissance4="puissance4"
+		var posi;
+		var posj;
+		
+		var maxX;
+		var x;
+		var y;
+		var slideTimer;
+		var fini;
+		
+		function init()
+		{
+			fini=0;
+			puissance4=new Array();
+			tour=0;
+			src=null;
+			desactiver=0;
+			posi=new Array();
+			posj=new Array();
+			
+			document.getElementById(id_puissance4).innerHTML='';
+			
+			for(var i=0;i<7;i++)
+			{
+				puissance4[i]=new Array();
+			}
+			
+			//ajout cotenu HTML/visuel
+			for(var i=0;i<7;i++)
+			{
+				document.getElementById(id_puissance4).innerHTML+='<img src="./images/fleche.jpg" id="'+i+'"  onMouseOver=switch_img(id) onClick=jouer(id) onMouseOut=switch_img(id)>';
+				src=document.getElementById(i).src;
+			}
+			
+			document.getElementById(id_puissance4).innerHTML+="<br>";
+			for(var i=0;i<7;i++)
+			{
+			
+				for(var j=0;j<7;j++)
+				{
+					var id=i.toString()+j.toString();
+					document.getElementById(id_puissance4).innerHTML+='<img src="./images/blanc.jpg" id="'+id+'">';
+				}
+				document.getElementById(id_puissance4).innerHTML+='<br>';
+			}
+			document.getElementById(id_puissance4).innerHTML+='<button onclick=init()>rejouer</button>';
+			
+			
+		}
+		function switch_img(id)
+		{	if(fini==0)
+			{
+				if(src==document.getElementById(id).src)
+				{	
+					document.getElementById(id).src="./images/fleche2.jpg";
+				}
+				else
+				{
+					document.getElementById(id).src="./images/fleche.jpg";
+				}
+			}
+		}
+		
+		function jouer(id)
+		{
+			if(desactiver==0)
+			{
+				desactiver=1;
+				for(var i=6;i>=0;i--)
+				{	
+					if(typeof(puissance4[i][id])=="undefined")
+					{
+						if(i>0)
+						{
+							maxX=i-1;
+							y=id;
+							x=0;
+							slideTimer=window.setInterval("slide()",250);
+							break;
+						}
+						else{
+							desactiver=0;
+							document.getElementById(id).disabled=true;
+							if(tour==0)
+							{
+								var pos=i.toString()+id.toString();
+								document.getElementById(pos).src="./images/rouge.jpg";
+								puissance4[i][id]=0;
+								tour=1;
+								victoire(i,parseInt(id));
+								break;
+							}
+							if(tour==1)
+							{
+								var pos=i.toString()+id.toString();
+								document.getElementById(pos).src="./images/jaune.jpg";
+								puissance4[i][id]=1;
+								tour=0;	
+								victoire(i,parseInt(id));
+								break;
+							}
+						}
+					}
+				}
+				/*if(fini==1)
+				{
+					desactiver=1;
+				}
+				else{
+					desactiver=0;
+				}*/
+			}
+		}
+		
+		function slide()
+		{	
+			if(x>maxX)
+			{
+				window.clearInterval(slideTimer);
+				var pos=(x-1).toString()+y.toString();
+				document.getElementById(pos).src="./images/blanc.jpg";
+				var pos=x.toString()+y.toString();
+				switch(tour)
+				{
+					case 0 : 
+						document.getElementById(pos).src="./images/rouge.jpg";
+						puissance4[x][y]=0;
+						tour=1;
+						desactiver=0;
+						victoire(x,y);
+						
+						break;
+					case 1 :
+						document.getElementById(pos).src="./images/jaune.jpg";
+						puissance4[x][y]=1;
+						tour=0;
+						desactiver=0;
+						victoire(x,y);
+						break;
+				}		
+			}
+			if(x<=maxX)
+			{
+				var pos=x.toString()+y.toString();
+				if(tour==0)
+				{
+					document.getElementById(pos).src="./images/rouge.jpg";
+					if(x>0)
+					{
+						var pos=(x-1).toString()+y.toString();
+						document.getElementById(pos).src="./images/blanc.jpg";
+					}
+				}
+				if(tour==1)
+				{
+					document.getElementById(pos).src="./images/jaune.jpg";
+					if(x>0)
+					{
+						var pos=(x-1).toString()+y.toString();
+						document.getElementById(pos).src="./images/blanc.jpg";
+					}
+				}
+				x++;
+			}
+		}
+		function ajoutposi_j(i,j)
+		{
+			posi.push(i);
+			posj.push(j);
+		}
+		
+		function fin()
+		{
+			desactiver=1;
+			fini=1;
+			for(var i=0;i<7;i++)
+			{			
+				
+				document.getElementById(i).onclick=false;
+				document.getElementById(i).src='./images/fleche3.jpg';
+									
+			}
+			
+			if(tour==0)
+			{
+				document.getElementById(id_puissance4).innerHTML+='victoire du joueur jaune';
+				for(var i=0;i<4;i++)
+				{
+					var pos=posi[i].toString()+posj[i].toString();
+					document.getElementById(pos).src='./images/jaune2.jpg';
+				}
+			}
+			if(tour==1)
+			{
+				document.getElementById(id_puissance4).innerHTML+='victoire du joueur rouge';
+				for(var i=0;i<4;i++)
+				{
+					var pos=posi[i].toString()+posj[i].toString();
+					document.getElementById(pos).src='./images/rouge2.jpg';
+				}
+			}
+
+		}
+		function victoire(i,j)
+		{	
+			test_3G(i,j);
+			test_3D(i,j);
+			test_2G_1D(i,j);
+			test_1G_2D(i,j);
+			test_3B(i,j);
+			test_3DBG(i,j);
+			test_3DBD(i,j);
+			test_3DHD(i,j);
+			test_3DHG(i,j);
+			test_2HD_1BG(i,j);
+			test_2HG_1BD(i,j);
+			test_1HG_2BD(i,j);
+			test_1HD_2BG(i,j);
+		}
+		
+		function test_3G(i,j)
+		{	if(j>=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=j-1;k>=(j-3);k--)
+				{	
+					if(puissance4[i][k]==couleur)
+					{
+						ajoutposi_j(i,k);
+						compteur++;
+
+					}
+
+				}
+				if(compteur==3)
+				{	
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+		function test_3D(i,j)
+		{
+			if(j<=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				
+				for(var k=j+1;k<=(j+3);k++)
+				{	
+					if(puissance4[i][k]==couleur)
+					{
+						ajoutposi_j(i,k);
+						compteur++;
+
+					}
+
+				}
+				
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}	
+			}
+		}
+		
+		
+		function test_2G_1D(i,j)
+		{
+			if(j>=2 && j<=5)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=j-1;k>=(j-2);k--)
+				{	
+					if(puissance4[i][k]==couleur)
+					{	
+						ajoutposi_j(i,k);
+						compteur++;
+					}
+
+				}
+				if(puissance4[i][j+1]==couleur)
+				{
+					ajoutposi_j(i,j+1);
+					compteur++;
+				}
+			
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);						
+					fin();
+				}
+			}
+			
+		}
+		
+		function test_1G_2D(i,j)
+		{
+			if(j>=1 && j<=4)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=j+1;k<=(j+2);k++)
+				{	
+
+					if(puissance4[i][k]==couleur)
+					{
+						ajoutposi_j(i,k);
+						compteur++;
+
+					}
+				}
+				if(puissance4[i][j-1]==couleur)
+				{
+					ajoutposi_j(i,j-1);
+					compteur++;
+
+				}
+				
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+		
+		function test_3B(i,j)
+		{	
+			if(i<=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=i+1;k<=(i+3);k++)
+				{	
+
+					if(puissance4[k][j]==couleur)
+					{
+						ajoutposi_j(k,j);
+						compteur++;
+						
+					}
+
+				}
+				
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+		
+		function test_3DBG(i,j)
+		{
+			if(i<=3 && j>=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=3;k++)
+				{	
+					if(puissance4[i+k][j-k]==couleur)
+					{
+						ajoutposi_j(i+k,j-k);
+						compteur++;
+					}
+
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+			
+		}
+		
+		function test_3DBD(i,j)
+		{
+			if(i<=3 && j<=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=3;k++)
+				{	
+					if(puissance4[i+k][j+k]==couleur)
+					{
+						ajoutposi_j(i+k,j+k);
+						compteur++;
+					}
+
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+		function test_3DHG(i,j)
+		{
+			if(i>=3 && j>=3)
+			{	
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=3;k++)
+				{	
+					if(puissance4[i-k][j-k]==couleur)
+					{
+						ajoutposi_j((i-k),(j-k));
+						compteur++;
+					}
+
+				}
+				
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+				
+		}
+		function test_3DHD(i,j)
+		{
+			if(i>=3 && j<=3)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=3;k++)
+				{	
+					if(puissance4[i-k][j+k]==couleur)
+					{
+						ajoutposi_j(i-k,j+k);
+						compteur++;
+					}
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+
+		function test_2HD_1BG(i,j)
+		{
+			if(i<=5 && i>=2 && j<=4 && j>=1)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=2;k++)
+				{	
+					if(puissance4[i-k][j+k]==couleur)
+					{
+						ajoutposi_j(i-k,j+k);
+						compteur++;
+					}
+
+				}
+				if(puissance4[i+1][j-1]==couleur)
+				{	
+					ajoutposi_j(i+1,j-1);
+					compteur++;
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+				
+					fin();
+				}
+			}
+		}
+
+		function test_2HG_1BD(i,j)
+		{
+			if(i<=5 && i>=2 && j>=2 && j<=5)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=2;k++)
+				{	
+					if(puissance4[i-k][j-k]==couleur)
+					{
+						ajoutposi_j(i-k,j-k);
+						compteur++;
+					}
+
+				}
+				if(puissance4[i+1][j+1]==couleur)
+				{
+					ajoutposi_j(i+1,j+1);
+					compteur++;
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}
+			}
+		}
+		function test_1HG_2BD(i,j)
+		{
+			if(i<=4 && i>=1 && j>=1 && j<=4)
+			{
+				posi=new Array();
+				posj=new Array();
+				var compteur=0;
+
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=2;k++)
+				{	
+					if(puissance4[i+k][j+k]==couleur)
+					{
+						ajoutposi_j(i+k,j+k);
+						compteur++;
+					}
+
+				}
+				if(puissance4[i-1][j-1]==couleur)
+				{
+					ajoutposi_j(i-1,j-1);
+					compteur++;
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}	
+			}
+		}
+		function test_1HD_2BG(i,j)
+		{
+			if(i<=4 && i>=1 && j<=5 && j>=2)
+			{
+			posi=new Array();
+			posj=new Array();
+			var compteur=0;
+
+				var couleur=puissance4[i][j];
+				for(var k=1;k<=2;k++)
+				{	
+					if(puissance4[i+k][j-k]==couleur)
+					{
+						ajoutposi_j(i+k,j-k);
+						compteur++;
+					}
+
+				}
+				if(puissance4[i-1][j+1]==couleur)
+				{
+					ajoutposi_j(i-1,j+1);
+					compteur++;
+				}
+				if(compteur==3)
+				{
+					ajoutposi_j(i,j);
+					fin();
+				}	
+			}
+		}
+		</script>
+	</body>
+</html>
